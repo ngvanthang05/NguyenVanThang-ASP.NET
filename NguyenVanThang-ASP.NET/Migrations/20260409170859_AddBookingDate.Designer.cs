@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NguyenVanThang_ASP.NET.Data;
 
@@ -11,9 +12,11 @@ using NguyenVanThang_ASP.NET.Data;
 namespace NguyenVanThang_ASP.NET.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260409170859_AddBookingDate")]
+    partial class AddBookingDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,8 +56,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("SeatId");
-
                     b.HasIndex("TripId");
 
                     b.ToTable("Bookings");
@@ -67,10 +68,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BusRouteId"));
-
-                    b.Property<decimal>("BasePrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Departure")
                         .IsRequired()
@@ -88,7 +85,7 @@ namespace NguyenVanThang_ASP.NET.Migrations
 
                     b.HasKey("BusRouteId");
 
-                    b.ToTable("Routes", (string)null);
+                    b.ToTable("BusRoutes");
                 });
 
             modelBuilder.Entity("NguyenVanThang_ASP.NET.Models.Checkin", b =>
@@ -170,8 +167,7 @@ namespace NguyenVanThang_ASP.NET.Migrations
 
                     b.HasKey("PaymentId");
 
-                    b.HasIndex("BookingId")
-                        .IsUnique();
+                    b.HasIndex("BookingId");
 
                     b.ToTable("Payments");
                 });
@@ -297,10 +293,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
                     b.Property<DateTime>("DepartureTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("RouteId")
                         .HasColumnType("int");
 
@@ -328,9 +320,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -344,8 +333,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
-
-                    b.HasIndex("CustomerId");
 
                     b.ToTable("Users");
                 });
@@ -382,12 +369,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NguyenVanThang_ASP.NET.Models.Seat", "Seat")
-                        .WithMany()
-                        .HasForeignKey("SeatId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("NguyenVanThang_ASP.NET.Models.Trip", "Trip")
                         .WithMany("Bookings")
                         .HasForeignKey("TripId")
@@ -395,8 +376,6 @@ namespace NguyenVanThang_ASP.NET.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
-
-                    b.Navigation("Seat");
 
                     b.Navigation("Trip");
                 });
@@ -423,8 +402,8 @@ namespace NguyenVanThang_ASP.NET.Migrations
             modelBuilder.Entity("NguyenVanThang_ASP.NET.Models.Payment", b =>
                 {
                     b.HasOne("NguyenVanThang_ASP.NET.Models.Booking", "Booking")
-                        .WithOne("Payment")
-                        .HasForeignKey("NguyenVanThang_ASP.NET.Models.Payment", "BookingId")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -480,20 +459,8 @@ namespace NguyenVanThang_ASP.NET.Migrations
                     b.Navigation("Vehicle");
                 });
 
-            modelBuilder.Entity("NguyenVanThang_ASP.NET.Models.User", b =>
-                {
-                    b.HasOne("NguyenVanThang_ASP.NET.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("NguyenVanThang_ASP.NET.Models.Booking", b =>
                 {
-                    b.Navigation("Payment");
-
                     b.Navigation("Tickets");
                 });
 
