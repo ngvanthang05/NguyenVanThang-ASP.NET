@@ -86,6 +86,10 @@ var app = builder.Build();
 
 // Gộp Swagger: Bỏ điều kiện IsDevelopment() nếu bạn muốn Swagger luôn hiện trên Somee
 // Vì đôi khi Somee chạy ở mode Production, Swagger sẽ bị ẩn nếu để trong if.
+
+// Thêm dòng này để xem lỗi chi tiết trên Somee
+app.UseDeveloperExceptionPage();
+
 app.UseSwagger();
 app.UseSwaggerUI(c => {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Bus Booking API v1");

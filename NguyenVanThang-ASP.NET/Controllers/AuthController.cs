@@ -8,6 +8,7 @@ using System.Security.Claims;
 using NguyenVanThang_ASP.NET.Data;
 using NguyenVanThang_ASP.NET.Models;
 using NguyenVanThang_ASP.NET.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace NguyenVanThang_ASP.NET.Controllers
@@ -29,41 +30,51 @@ namespace NguyenVanThang_ASP.NET.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
-            if (_context.Users.Any(u => u.Username == request.Username))
-                return BadRequest(new { message = "Username đã tồn tại" });
-
-            var user = new User
+            try
             {
-                Username = request.Username,
-                Password = HashPassword(request.Password),
-                Role = "Customer"
-            };
-            _context.Users.Add(user);
+                if (_context.Users.Any(u => u.Username == request.Username))
+                    return BadRequest(new { message = "Username đã tồn tại" });
 
-            // Tạo Customer tương ứng
-            var customer = new Customer
+                var customer = new Customer
+                {
+                    Name = request.FullName,
+                    Phone = request.Phone,
+                    Email = request.Email,
+                    CreatedAt = DateTime.Now
+                };
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
+
+                var user = new User
+                {
+                    Username = request.Username,
+                    Password = HashPassword(request.Password),
+                    Role = "Customer",
+                    CustomerId = customer.CustomerId
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Đăng ký thành công" });
+            }
+            catch (Exception ex)
             {
-                Name = request.FullName,
-                Phone = request.Phone,
-                Email = request.Email,
-                CreatedAt = DateTime.Now
-            };
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-
-            // Link User -> Customer
-            user.CustomerId = customer.CustomerId;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Đăng ký thành công" });
+                // Tạm thời để debug — xóa sau khi fix xong
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message,
+                    detail = ex.ToString()
+                });
+            }
         }
 
         // POST api/auth/login
         [HttpPost("login")]
-        public IActionResult Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginRequest request)
         {
             var hashedPassword = HashPassword(request.Password);
-            var user = _context.Users.FirstOrDefault(
+            var user = await _context.Users.FirstOrDefaultAsync(
                 x => x.Username == request.Username && x.Password == hashedPassword);
 
             if (user == null) return Unauthorized(new { message = "Sai tài khoản hoặc mật khẩu" });
