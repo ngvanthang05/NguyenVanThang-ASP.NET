@@ -24,7 +24,6 @@ namespace NguyenVanThang_ASP.NET.Controllers
                 .Include(t => t.Booking).ThenInclude(b => b.Trip).ThenInclude(t => t.Route)
                 .Include(t => t.Seat)
                 .FirstOrDefaultAsync(t => t.QrCode == qrCode);
-
             if (ticket == null)
                 return NotFound(new { message = "QR Code không hợp lệ" });
 
@@ -45,8 +44,6 @@ namespace NguyenVanThang_ASP.NET.Controllers
                 CheckinTime = DateTime.Now
             };
             _context.Checkins.Add(checkin);
-
-            // Đánh dấu vé đã dùng
             ticket.TicketStatus = "Used";
             await _context.SaveChangesAsync();
 
@@ -61,7 +58,6 @@ namespace NguyenVanThang_ASP.NET.Controllers
             });
         }
 
-        // GET: api/checkins/trip/5 — danh sách check-in theo chuyến
         [HttpGet("trip/{tripId}")]
         public async Task<IActionResult> GetCheckinsByTrip(int tripId)
         {
